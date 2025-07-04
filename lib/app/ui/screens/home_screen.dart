@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:weather_now/app/controllers/weather_model.dart';
+import 'package:weather_now/app/controllers/weather_Controller.dart';
 import 'package:weather_now/app/ui/widgets/circular_particle.dart';
 import 'package:weather_now/app/ui/widgets/current_weather_widget.dart';
 import 'package:weather_now/app/ui/widgets/forecast_card.dart';
@@ -600,6 +600,7 @@ class HomeScreen extends StatelessWidget {
     ).animate().fadeIn(duration: 400.ms);
   }
 
+  
   Widget _buildLoadingShimmer(bool isDarkMode) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
@@ -742,4 +743,7 @@ class HomeScreen extends StatelessWidget {
         return const SizedBox.shrink(key: ValueKey('no_particle'));
     }
   }
+
+
 }
+

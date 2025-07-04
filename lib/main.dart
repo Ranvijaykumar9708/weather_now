@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:weather_now/app/bindings/app_binding.dart';
-import 'package:weather_now/app/controllers/weather_model.dart';
+import 'package:weather_now/app/controllers/weather_Controller.dart';
 import 'package:weather_now/app/ui/screens/splash_screen.dart';
+import 'package:weather_now/repositories/weather_repository.dart';
+import 'package:weather_now/repositories/weather_repository_impl.dart';
 import 'package:weather_now/utils/translations.dart';
 
 void main() {
@@ -17,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Initialize WeatherController early to sync theme mode
-    final WeatherController controller = Get.put(WeatherController(), permanent: true);
+    final WeatherController controller = Get.put(WeatherController(weatherRepository: WeatherRepositoryImpl()), permanent: true);
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,

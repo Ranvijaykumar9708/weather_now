@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class WeatherModel {
   final String cityName;
@@ -14,6 +12,11 @@ class WeatherModel {
   final double windSpeed;
   final String date;
   final List<Map<String, dynamic>>? alerts;
+  final double? lat; // Added for currentLat
+  final double? lon; // Added for currentLon
+  final int? sunriseTime; // Added for sunrise
+  final int? sunsetTime; // Added for sunset
+  final double? rainChance; // Added for rain chance
 
   WeatherModel({
     required this.cityName,
@@ -26,6 +29,11 @@ class WeatherModel {
     required this.windSpeed,
     this.date = '',
     this.alerts,
+    this.lat,
+    this.lon,
+    this.sunriseTime,
+    this.sunsetTime,
+    this.rainChance,
   });
 
   factory WeatherModel.fromCurrentJson(Map<String, dynamic> json) {
@@ -39,6 +47,11 @@ class WeatherModel {
       humidity: json['main']['humidity']?.toInt() ?? 0,
       windSpeed: (json['wind']['speed'] as num?)?.toDouble() ?? 0.0,
       alerts: (json['alerts'] as List<dynamic>?)?.cast<Map<String, dynamic>>(),
+      lat: (json['coord']['lat'] as num?)?.toDouble(),
+      lon: (json['coord']['lon'] as num?)?.toDouble(),
+      sunriseTime: json['sys']?['sunrise']?.toInt(),
+      sunsetTime: json['sys']?['sunset']?.toInt(),
+      rainChance: (json['rain']?['1h'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -54,14 +67,12 @@ class WeatherModel {
       windSpeed: (json['wind']['speed'] as num?)?.toDouble() ?? 0.0,
       date: json['dt_txt'] ?? '',
       alerts: (json['alerts'] as List<dynamic>?)?.cast<Map<String, dynamic>>(),
+      lat: (json['city']?['coord']?['lat'] as num?)?.toDouble(),
+      lon: (json['city']?['coord']?['lon'] as num?)?.toDouble(),
+      rainChance: (json['rain']?['3h'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
-  get sunriseTime => null;
-
-  get rainChance => null;
-
-  get sunsetTime => null;
 
   Map<String, dynamic> toJson() {
     return {
@@ -81,28 +92,9 @@ class WeatherModel {
       'wind': {'speed': windSpeed},
       'dt_txt': date,
       if (alerts != null) 'alerts': alerts,
+      if (lat != null) 'coord': {'lat': lat, 'lon': lon},
+      if (sunriseTime != null) 'sys': {'sunrise': sunriseTime, 'sunset': sunsetTime},
+      if (rainChance != null) 'rain': {'1h': rainChance},
     };
-  }
-}
-
-Future<WeatherModel?> fetchWeatherAndCache(String url) async {
-  try {
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      final weather = WeatherModel.fromCurrentJson(jsonData);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('cachedWeather_${url.hashCode}', json.encode(weather.toJson()));
-      return weather;
-    }
-    throw Exception('Failed to load weather');
-  } catch (e) {
-    final prefs = await SharedPreferences.getInstance();
-    final cached = prefs.getString('cachedWeather_${url.hashCode}');
-    if (cached != null) {
-      final cachedData = json.decode(cached);
-      return WeatherModel.fromCurrentJson(cachedData);
-    }
-    return null;
   }
 }
